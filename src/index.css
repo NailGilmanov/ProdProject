@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+a {
+  text-decoration: none !important;
+  color: #9ba3a7 !important;
+}
+
 body {
-  background-color: #fefefe;
+  /* background-color: #1d4068 !important; */
+  /* color: #dfe7eb !important; */
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -17,7 +23,6 @@ code {
     monospace;
 }
 
-a {
-  text-decoration: none !important;
-  color: black !important;
+.apexcharts-toolbar {
+  display: none !important;
 }

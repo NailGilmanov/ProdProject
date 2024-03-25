@@ -9,6 +9,9 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+
 export default function Header(props) {
 
     const habitTitle = useRef();
@@ -20,31 +23,50 @@ export default function Header(props) {
         currentPeriod = text
     }
 
+    const [showCalendar, setShowCalendar] = useState(false);
+
+    const handleCloseCalendar = () => setShowCalendar(false);
+    const handleShowCalnedar = () => setShowCalendar(true);
+    const handleDateChange = () => {
+        const days = props.calendarValue;
+        days.setDate(days.getDate() + 1);
+        if (props.calendarValue.toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)) {
+            props.setCurDay(true)
+        } else {
+            props.setCurDay(false)
+        }
+        days.setDate(days.getDate() - 1)
+        setShowCalendar(false);
+    };
+
     const handleCreate = () => {
         if (habitTitle.current.value && currentPeriod) {
+            props.setCalendarValue(new Date());
             let habits = JSON.parse(localStorage.getItem('habits'))
-            console.log(habits);
-            let newHabit = {
-                id: new Date().toString(),
-                addDate: new Date().toString(),
-                title: habitTitle.current.value,
-                category: habitCategory.current.value,
-                period: currentPeriod,
-                done: false,
+            const habitsTitles = habits.map((habit) => habit.title)
+            console.log(habitsTitles)
+            if (habitsTitles.indexOf(habitTitle.current.value) === -1) {
+                let newHabit = {
+                    id: new Date().toString(),
+                    addDate: new Date().toString(),
+                    title: habitTitle.current.value,
+                    category: habitCategory.current.value,
+                    period: currentPeriod,
+                    done: false,
+                }
+                habits.push(newHabit)
+                localStorage.setItem('habits', JSON.stringify(habits))
+                setShow(false)
+                const doneHabits = habits.filter((habit) => habit.done === true);
+                const currentRating = Math.round((doneHabits.length / habits.length) * 100)
+                props.setRate(currentRating);
+                localStorage.setItem('rate', currentRating);
+                window.location.reload()
             }
-            habits.push(newHabit)
-            localStorage.setItem('habits', JSON.stringify(habits))
-            setShow(false)
-            const doneHabits = habits.filter((habit) => habit.done === true);
-            const currentRating = Math.round((doneHabits.length / habits.length) * 100)
-            props.setRate(currentRating);
-            localStorage.setItem('rate', currentRating);
-            window.location.reload()
         }
     }
 
-
-    const ruDate = new Intl.DateTimeFormat("ru", {day: "numeric", month: "long", year: "numeric", weekday: "long"}).format(new Date()).replace(/(\s?\.?)/, "")
+    const ruDate = new Intl.DateTimeFormat("ru", {day: "numeric", month: "long", year: "numeric", weekday: "long"}).format(props.calendarValue).replace(/(\s?\.?)/, "")
 
     const [show, setShow] = useState(false);
 
@@ -54,21 +76,32 @@ export default function Header(props) {
     };
     const handleShow = () => setShow(true);
     const exitFunc = () => {
-        localStorage.setItem('name', '');
-        localStorage.setItem('email', '');
-        localStorage.setItem('signUp', '');
-        localStorage.setItem('password', '');
+        localStorage.clear();
         window.location.reload();
     }
 
     return (
         <header className="p-4 flex justify-between font-mono header">
-            <Link to="/">
-                <section className="left-side">
-                    <h1 className="text-2xl font-extrabold">DailyHabits</h1>
-                    <label className="text-sm text-gray-400 font-normal">{ruDate}</label>
-                </section>
-            </Link>
+            <Modal show={showCalendar} onHide={handleCloseCalendar}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Изменить дату</Modal.Title>
+                </Modal.Header>
+                <Modal.Body><Calendar onChange={props.setCalendarValue} value={props.calendarValue}/></Modal.Body>
+                <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseCalendar}>
+                    Отмена
+                </Button>
+                <Button variant="success" onClick={handleDateChange}>
+                    Сохранить
+                </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <section className="left-side">
+                <h1 className="text-2xl font-extrabold logo"><Link to="/">DailyHabits</Link></h1>
+                <label className="text-sm text-gray-400 font-normal" onClick={handleShowCalnedar}>{ruDate}</label>
+            </section>
+            
             <section className="right-side">
                 <Dropdown>
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -79,6 +112,8 @@ export default function Header(props) {
                         <Dropdown.Item onClick={handleShow}>Добавить привычку</Dropdown.Item>
                         <Dropdown.Item><Link to='/'>Главная</Link></Dropdown.Item>
                         <Dropdown.Item><Link to='/profile'>Профиль</Link></Dropdown.Item>
+                        <Dropdown.Item><Link to='/shop'>Магазин</Link></Dropdown.Item>
+                        <Dropdown.Item><Link to='/library'>Бибилиотека привычек</Link></Dropdown.Item>
                         <Dropdown.Item onClick={exitFunc}>Выйти</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>

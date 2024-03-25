@@ -16,8 +16,12 @@ export default function SignInSignUp() {
             localStorage.setItem("email", email.current.value)
             localStorage.setItem("signUp", email.current.value)
             localStorage.setItem("habits", JSON.stringify([]))
+            localStorage.setItem("habitsHistory", JSON.stringify([]))
             localStorage.setItem("rate", 0)
+            localStorage.setItem("coins", 0)
             localStorage.setItem("actions", JSON.stringify([]))
+            localStorage.setItem("failActions", JSON.stringify([]))
+            localStorage.setItem("buyTheme", false)
             window.location.reload()
         }
     }
